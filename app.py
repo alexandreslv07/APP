@@ -16,13 +16,14 @@ def build_sidebar():
     end_date = st.date_input("Até", format="DD/MM/YYYY", value="today")
 
     if tickers:
-        prices = yf.download(tickers, start=start_date, end=end_date)["Adj Close"]
+        prices = yf.download(tickers, start=start_date, end=end_date)["Close"]
+
         if len(tickers) == 1:
-            prices = prices.to_frame()
+            prices = pd.DataFrame(prices)
             prices.columns = [tickers[0].rstrip(".SA")]
                     
         prices.columns = prices.columns.str.rstrip(".SA")
-        prices['IBOV'] = yf.download("^BVSP", start=start_date, end=end_date)["Adj Close"]
+        prices['IBOV'] = yf.download("^BVSP", start=start_date, end=end_date)["Close"]
         return tickers, prices
     return None, None
 
@@ -34,7 +35,7 @@ def build_main(tickers, prices):
     vols = returns.std()*np.sqrt(252)
     rets = (norm_prices.iloc[-1] - 100) / 100
 
-    mygrid = grid(5 ,5 ,5 ,5 ,5 , 5, vertical_align="top")
+    mygrid = grid(3 ,3 ,3 , 3 ,3 , 3, vertical_align="top")
     for t in prices.columns:
         c = mygrid.container(border=True)
         c.subheader(t, divider="red")
@@ -52,7 +53,7 @@ def build_main(tickers, prices):
     col1, col2 = st.columns(2, gap='large')
     with col1:
         st.subheader("Desempenho Relativo")
-        st.line_chart(norm_prices, height=600)
+        st.line_chart(norm_prices, height=400)
 
     with col2:
         st.subheader("Risco-Retorno")
@@ -70,7 +71,7 @@ def build_main(tickers, prices):
         )
         fig.layout.yaxis.title = 'Retorno Total'
         fig.layout.xaxis.title = 'Volatilidade (anualizada)'
-        fig.layout.height = 600
+        fig.layout.height = 400
         fig.layout.xaxis.tickformat = ".0%"
         fig.layout.yaxis.tickformat = ".0%"        
         fig.layout.coloraxis.colorbar.title = 'Sharpe'
